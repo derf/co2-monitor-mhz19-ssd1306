@@ -87,8 +87,18 @@ function uart_callback(data)
 		local json_str = string.format('{"rssi_dbm":%d,"co2_ppm":%d,"temperature_celsius":%d}', wifi.sta.getrssi(), mh_z19.co2, mh_z19.temp)
 		mqttclient:publish(mqtt_prefix .. "/data", json_str, 0, 0, function(client)
 			publishing_mqtt = false
-			gpio.write(ledpin, 1)
-			collectgarbage()
+			if have_wifi and influx_url and not publishing_http then
+				local influx_str = string.format("co2_ppm=%d,temperature_celsius=%d,abc_ticks=%d,abc_count=%d", mh_z19.co2, mh_z19.temp, mh_z19.abc_ticks, mh_z19.abc_count)
+				publishing_http = true
+				http.post(influx_url, influx_header, "mh_z19" .. influx_attr .. " " .. influx_str, function(code, data)
+					gpio.write(ledpin, 1)
+					publishing_http = false
+					collectgarbage()
+				end)
+			else
+				gpio.write(ledpin, 1)
+				collectgarbage()
+			end
 		end)
 	else
 		collectgarbage()
