@@ -63,3 +63,7 @@ influx_attr = ',location=' .. device_id
 
 Optionally, you can set `influx_header` to an HTTP header that is passed as
 part of the POST request to InfluxDB.
+
+## Images
+
+![](https://finalrewind.org/projects/co2-monitor-mhz19-ssd1306/media/preview.jpg)
