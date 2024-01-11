@@ -23,6 +23,9 @@ no_wifi_count = 0
 publish_count = 0
 publishing_mqtt = false
 
+past_pos = 1
+past = {}
+
 function connect_wifi()
 	print("Connecting to ESSID " .. station_cfg.ssid)
 	wifi.eventmon.register(wifi.eventmon.STA_GOT_IP, wifi_connected)
@@ -56,17 +59,22 @@ function uart_callback(data)
 		return
 	end
 
-	local line1 = string.format("%8d ppm\n", mh_z19.co2)
-	local line2 = string.format("%8d c\n", mh_z19.temp)
+	local line1 = string.format("%4d ppm\n", mh_z19.co2)
+	local line2 = string.format("%4d c\n", mh_z19.temp)
+
+	past[past_pos] = (mh_z19.co2 - 400) / 64
+	past[past_pos] = past[past_pos] >=  0 and past[past_pos] or  0
+	past[past_pos] = past[past_pos] <= 31 and past[past_pos] or 31
+	past_pos = (past_pos) % 48 + 1
 
 	fb.print(fn, line1)
 	fb.print(fn, line2)
 
-	if have_wifi then
-		fb.y = 16
-		fb.x = 100
-		fb.print(fn, string.format("%d", wifi.sta.getrssi()))
-	else
+	for i = 1, 48 do
+		fb.buf[80 + i] = bit.lshift(1, 31 - (past[(past_pos + (i-2)) % 48 + 1] or 0))
+	end
+
+	if not have_wifi then
 		if no_wifi_count == 5 then
 			wifi.setmode(wifi.NULLMODE, false)
 		end
