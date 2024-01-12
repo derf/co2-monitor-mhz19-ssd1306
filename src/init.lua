@@ -62,7 +62,7 @@ function uart_callback(data)
 	local line1 = string.format("%4d ppm\n", mh_z19.co2)
 	local line2 = string.format("%4d c\n", mh_z19.temp)
 
-	past[past_pos] = (mh_z19.co2 - 400) / 64
+	past[past_pos] = (mh_z19.co2 - 400) / 50
 	past[past_pos] = past[past_pos] >=  0 and past[past_pos] or  0
 	past[past_pos] = past[past_pos] <= 31 and past[past_pos] or 31
 	past_pos = (past_pos) % 48 + 1
@@ -87,6 +87,7 @@ function uart_callback(data)
 	end
 	ssd1306.show(fb.buf)
 	fb.init(128, 32)
+	collectgarbage()
 	publish_count = publish_count + 1
 	if have_wifi and publish_count >= 4 and not publishing_mqtt then
 		publish_count = 0
@@ -108,8 +109,6 @@ function uart_callback(data)
 				collectgarbage()
 			end
 		end)
-	else
-		collectgarbage()
 	end
 end
 
