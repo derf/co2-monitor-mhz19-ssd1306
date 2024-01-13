@@ -4,3 +4,6 @@
 [submodule "ext/mh-z19"]
 	path = ext/mh-z19
 	url = https://github.com/derf/esp8266-nodemcu-mh-z19.git
+[submodule "ext/nodemcu-uploader"]
+	path = ext/nodemcu-uploader
+	url = https://github.com/kmpm/nodemcu-uploader.git
