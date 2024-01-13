@@ -17,6 +17,32 @@ It can also publish readings to InfluxDB.
 * CO₂ sensor: MH-Z19
 * Display: 128×32 OLED via SSD1306 (128×64 also supported with some changes)
 
+## Flashing
+
+This repository contains a NodeMCU build that provides the required modules.
+You can flash it using e.g. esptool:
+
+```bash
+esptool write_flash 0x00000 firmware/nodemcu-release-13-modules-2022-04-17-19-03-07-integer.bin
+```
+
+After flashing, the firmware will need a few seconds to initialize the
+filesystem. You can use that time to create `config.lua` (see below) and then
+flash the Python code, e.g. using nodemcu-uploader:
+
+```bash
+ext/nodemcu-uploader/nodemcu-uploader.py upload *.lua
+```
+
+Afterwards, you can check whether everything works using the serial connection,
+e.g.
+
+```bash
+pyserial-miniterm --dtr 0 --rts 0 /dev/ttyUSB0 115200
+```
+
+You may need to adjust the `/dev/tty` device name.
+
 ## Configuration
 
 WiFi, Home Assistant, and InfluxDB configuration is read from `src/config.lua`.
