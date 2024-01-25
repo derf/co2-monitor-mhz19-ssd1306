@@ -93,3 +93,11 @@ part of the POST request to InfluxDB.
 ## Images
 
 ![](https://finalrewind.org/projects/co2-monitor-mhz19-ssd1306/media/preview.jpg)
+
+## Resources
+
+Mirrors of this repository are maintained at the following locations:
+
+* [Chaosdorf](https://chaosdorf.de/git/derf/co2-monitor-mhz19-ssd1306)
+* [git.finalrewind.org](https://git.finalrewind.org/co2-monitor-mhz19-ssd1306/)
+* [GitHub](https://github.com/derf/co2-monitor-mhz19-ssd1306)
