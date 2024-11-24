@@ -7,7 +7,7 @@ It can also publish readings to InfluxDB.
 ## Features
 
 * Display for CO₂ and temperature
-* Home Assistant integration via MQTT
+* Optional Home Assistant integration via MQTT
 * Optional logging to InfluxDB
 * Powered via USB
 
@@ -60,8 +60,9 @@ station_cfg = {ssid = "foo", pwd = "bar"}
 
 ### MQTT
 
-The only configurable entity is the hostname of the MQTT broker. The ESP8266
-will register itself as `homeassistant/sensor/esp8266_XXXXXX` with the last six
+This setting is optional. Specify the hostname of an MQTT broker in order to
+enable MQTT publishing and Home Assistant integration.  The ESP8266 will
+register itself as `homeassistant/sensor/esp8266_XXXXXX` with the last six
 digits representing its WiFi MAC address.
 
 ```lua
@@ -73,10 +74,10 @@ mqtt_host = "mqtt.example.org"
 These settings are optional. Specify a URL and attributes in order to enable
 InfluxDB publishing. For instance, if measurements should be stored as
 `mh_z19,location=lounge` in the `sensors` database on
-`https://influxdb.example.org`, the configuration is as follows.
+`http://influxdb.example.org:8086`, the configuration is as follows.
 
 ```lua
-influx_url = 'https://influxdb.example.org/write?db=sensors'
+influx_url = 'http://influxdb.example.org:8086/write?db=sensors'
 influx_attr = ',location=lounge'
 ```
 

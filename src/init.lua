@@ -1,9 +1,12 @@
 chip_id = string.format("%06X", node.chipid())
 device_id = "esp8266_" .. chip_id
-mqtt_prefix = "sensor/" .. device_id
-mqttclient = mqtt.Client(device_id, 120)
 
 dofile("config.lua")
+
+if mqtt_host then
+	mqtt_prefix = "sensor/" .. device_id
+	mqttclient = mqtt.Client(device_id, 120)
+end
 
 i2c.setup(0, 5, 6, i2c.SLOW)
 ssd1306 = require("ssd1306")
@@ -89,26 +92,36 @@ function uart_callback(data)
 	fb.init(128, 32)
 	collectgarbage()
 	publish_count = publish_count + 1
-	if have_wifi and publish_count >= 4 and not publishing_mqtt then
-		publish_count = 0
-		publishing_mqtt = true
-		gpio.write(ledpin, 0)
+	if have_wifi and publish_count >= 4 then
 		local json_str = string.format('{"rssi_dbm":%d,"co2_ppm":%d,"temperature_celsius":%d}', wifi.sta.getrssi(), mh_z19.co2, mh_z19.temp)
-		mqttclient:publish(mqtt_prefix .. "/data", json_str, 0, 0, function(client)
-			publishing_mqtt = false
-			if have_wifi and influx_url and not publishing_http then
-				local influx_str = string.format("co2_ppm=%d,temperature_celsius=%d,abc_ticks=%d,abc_count=%d", mh_z19.co2, mh_z19.temp, mh_z19.abc_ticks, mh_z19.abc_count)
-				publishing_http = true
-				http.post(influx_url, influx_header, "mh_z19" .. influx_attr .. " " .. influx_str, function(code, data)
+		local influx_str = string.format("co2_ppm=%d,temperature_celsius=%d,abc_ticks=%d,abc_count=%d", mh_z19.co2, mh_z19.temp, mh_z19.abc_ticks, mh_z19.abc_count)
+		publish_count = 0
+		if mqtt_host and not publishing_mqtt then
+			publishing_mqtt = true
+			gpio.write(ledpin, 0)
+			mqttclient:publish(mqtt_prefix .. "/data", json_str, 0, 0, function(client)
+				publishing_mqtt = false
+				if have_wifi and influx_url and not publishing_http then
+					publishing_http = true
+					http.post(influx_url, influx_header, "mh_z19" .. influx_attr .. " " .. influx_str, function(code, data)
+						gpio.write(ledpin, 1)
+						publishing_http = false
+						collectgarbage()
+					end)
+				else
 					gpio.write(ledpin, 1)
-					publishing_http = false
 					collectgarbage()
-				end)
-			else
+				end
+			end)
+		elseif influx_url and not publishing_http then
+			publishing_http = true
+			gpio.write(ledpin, 0)
+			http.post(influx_url, influx_header, "mh_z19" .. influx_attr .. " " .. influx_str, function(code, data)
 				gpio.write(ledpin, 1)
+				publishing_http = false
 				collectgarbage()
-			end
-		end)
+			end)
+		end
 	end
 end
 
@@ -116,11 +129,14 @@ function wifi_connected()
 	print("IP address: " .. wifi.sta.getip())
 	have_wifi = true
 	no_wifi_count = 0
-	print("Connecting to MQTT " .. mqtt_host)
-	mqttclient:on("connect", hass_register)
-	mqttclient:on("offline", wifi_err)
-	mqttclient:lwt(mqtt_prefix .. "/state", "offline", 0, 1)
-	mqttclient:connect(mqtt_host)
+
+	if mqtt_host then
+		print("Connecting to MQTT " .. mqtt_host)
+		mqttclient:on("connect", hass_register)
+		mqttclient:on("offline", wifi_err)
+		mqttclient:lwt(mqtt_prefix .. "/state", "offline", 0, 1)
+		mqttclient:connect(mqtt_host)
+	end
 end
 
 function wifi_err()
