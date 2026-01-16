@@ -17,6 +17,17 @@ It can also publish readings to InfluxDB.
 * CO₂ sensor: MH-Z19
 * Display: 128×32 OLED via SSD1306 (128×64 also supported with some changes)
 
+## Pinout
+
+* MH-Z19 VCC → NodeMCU 5V
+* MH-Z19 GND → NodeMCU/ESP8266 GND
+* MH-Z19 RX → NodeMCU D1 (ESP8266 GPIO5)
+* MH-Z19 TX → NodeMCU D2 (ESP8266 GPIO4)
+* SSD1306 VCC → NodeMCU/ESP8266 3V3
+* SSD1306 GND → NodeMCU/ESP8266 GND
+* SSD1306 SDA → NodeMCU D5 (ESP8266 GPIO14)
+* SSD1306 SCL → NodeMCU D6 (ESP8266 GPIO12)
+
 ## Flashing
 
 This repository contains a NodeMCU build that provides the required modules.
