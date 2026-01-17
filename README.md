@@ -66,7 +66,7 @@ WPA2 Enterprise is not supported.
 Leave out the `psk` for open WiFi.
 
 ```lua
-station_cfg = {ssid = "foo", pwd = "bar"}
+station_cfg = {ssid = "foo", pwd = "bar", save = false}
 ```
 
 ### MQTT
